@@ -40,17 +40,7 @@ Token-2022 with extensions: TransferHook (program = transfer_hook), MetadataPoin
 
 ## Perihelion application
 
-Institution deposits into a Perihelion-managed SPL stake pool; the pool delegates across the Tier 1 operators; Perihelion holds the pool manager key only and never custodies stake.
-
-The SPL stake pool program rejects a pool mint with the TransferHook extension (verified from source, `is_extension_supported_for_mint`, Oct 12 2026). Supported pool-mint extensions: Uninitialized, TransferFeeConfig, ConfidentialTransferMint, ConfidentialTransferFeeConfig, DefaultAccountState, InterestBearingConfig, MetadataPointer, TokenMetadata.
-
-### Option A, wrapper (this capstone)
-A third program vaults plain pool tokens and mints a 1:1 permissioned Token-2022 token with the hook. Burn to unwrap. The vault is program-owned with no admin withdraw path. Open for counsel: whether a program-owned vault changes the custody analysis.
-
-### Option B, default-frozen pool mint (first shippable fallback)
-`DefaultAccountState = Frozen` on the pool mint itself. Perihelion as freeze authority thaws accounts after KYC and refreezes on termination. No wrapper, no vault. Gates accounts rather than transfers; no expiry. Supported by the stake pool program as-is.
-
-Decision: build A in the course; ship B first if a mandate lands before A is hardened; A is the upgrade path.
+Perihelion does not run a stake pool and never custodies client stake. An institution's custodian opens native stake accounts delegated across the Tier 1 members. Native stake accounts are not tokens, so the transfer hook has no role in Perihelion. What carries over is the registry; see Operator registry below.
 
 ## Operator registry (same program, different attester)
 
@@ -70,5 +60,4 @@ ConfidentialTransferMint on the same mint, so balances are private while transfe
 ## Open questions
 
 - Hook access to the Clock sysvar via ExtraAccountMetaList: confirm during the transfer-hook example walkthrough.
-- Whether the wrapper (Option A) should allow partial unwrap.
 - Entry account rent: who pays, and whether revoked entries are closed to reclaim it.
